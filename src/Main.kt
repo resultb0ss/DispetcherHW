@@ -1,3 +1,4 @@
+import kotlinx.coroutines.cancelAndJoin
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -15,25 +16,26 @@ suspend fun main() = coroutineScope {
         val inputMain = readln()
         when(inputMain){
             "1" -> {
+
                 val myPerson = PersonManager(personList)
                 val person = myPerson.addPerson()
-                launch {person.addPassword(resultList)}
-                println("Добавить сотрудника: \n1.Да \n2.Прочитать базу данных")
-                val inputSecond = readln()
-                when(inputSecond){
-                    "1" -> continue
-                    "2" -> {
-                        readDataPersonList(resultList)
-                        continue
-                    }
-                }
+                println("Сотрудник ${person.name} успешно добавлен")
             }
             "2" -> {
+                val job = launch {
+                    val person = personList.last()
+                    person.addPassword(resultList)
+                    readDataPersonList(resultList)
+                }
+                if (readln() == "0"){
+
+                    launch {
+                        job.cancelAndJoin()
+                        println("Завершение полной работы")
+                    }
+                }
                 println("Завершение работы")
-
                 break
-
-
             }
         }
     }
